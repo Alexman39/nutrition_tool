@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nutrition Plan Parser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="control-panel">
+      <div class="panel-card sticky-card">
+        <div class="eyebrow">Internal Coaching Tool</div>
+        <h1>Nutrition Plan Parser</h1>
+        <p class="panel-intro">
+          Κάνε επικόλληση το raw πρόγραμμα διατροφής, πάτα parse και πάρε έτοιμο premium preview για screenshot ή print to PDF.
+        </p>
+
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="athleteName">Athlete Name</label>
+            <input id="athleteName" type="text" placeholder="π.χ. Γιώργος Παπαδόπουλος" />
+          </div>
+
+          <div class="field-group">
+            <label for="goal">Goal</label>
+            <input id="goal" type="text" placeholder="π.χ. Fat Loss" />
+          </div>
+
+          <div class="field-group">
+            <label for="duration">Duration</label>
+            <input id="duration" type="text" placeholder="π.χ. 4 Weeks" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="rawInput">Raw Nutrition Text</label>
+          <textarea id="rawInput" placeholder="Κάνε επικόλληση εδώ το ελληνικό raw κείμενο..."></textarea>
+        </div>
+
+        <div class="button-row">
+          <button id="parseBtn" class="btn btn-primary">Parse Plan</button>
+          <button id="resetBtn" class="btn btn-secondary" type="button">Reset</button>
+          <button id="exampleBtn" class="btn btn-ghost" type="button">Load Example</button>
+        </div>
+
+        <div class="helper-box">
+          <div class="helper-title">Supported patterns</div>
+          <p>
+            Γεύμα 1, Πρωινό, Μεσημεριανό, Βραδινό, Snack, Pre/Post Workout, Σημειώσεις, Παρατηρήσεις.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="preview-panel">
+      <div class="toolbar panel-card no-print">
+        <div>
+          <div class="eyebrow">Preview</div>
+          <h2>Live Nutrition Page</h2>
+        </div>
+        <div class="toolbar-actions">
+          <button id="printBtn" class="btn btn-secondary" type="button">Print / Save PDF</button>
+        </div>
+      </div>
+
+      <section id="previewPage" class="nutrition-page">
+        <header class="page-hero">
+          <div>
+            <div class="hero-kicker">Misailidis Hybrid Method</div>
+            <h2 id="previewAthlete">Athlete Name</h2>
+            <p id="previewSubtitle">Premium nutrition plan preview ready for screenshot and PDF export.</p>
+          </div>
+        </header>
+
+        <section class="info-strip">
+          <article class="info-card">
+            <span class="info-label">Athlete</span>
+            <strong id="infoAthlete">—</strong>
+          </article>
+          <article class="info-card">
+            <span class="info-label">Goal</span>
+            <strong id="infoGoal">—</strong>
+          </article>
+          <article class="info-card">
+            <span class="info-label">Duration</span>
+            <strong id="infoDuration">—</strong>
+          </article>
+        </section>
+
+        <section class="content-card">
+          <div id="mealsContainer" class="meals-grid"></div>
+
+          <section id="notesSection" class="notes-section hidden">
+            <div class="section-heading">
+              <span></span>
+              <h3>Σημειώσεις</h3>
+            </div>
+            <ul id="notesList" class="notes-list"></ul>
+          </section>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
