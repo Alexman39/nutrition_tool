@@ -1,111 +1,140 @@
 <!DOCTYPE html>
 <html lang="el">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nutrition Plan Parser</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="control-panel">
-      <div class="panel-card sticky-card">
-        <div class="eyebrow">Internal Coaching Tool</div>
-        <h1>Nutrition Plan Parser</h1>
-        <p class="panel-intro">
-          Κάνε επικόλληση το raw πρόγραμμα διατροφής, πάτα parse και πάρε έτοιμο premium preview για screenshot ή print to PDF.
-        </p>
-
-        <div class="form-grid">
-          <div class="field-group">
-            <label for="athleteName">Athlete Name</label>
-            <input id="athleteName" type="text" placeholder="π.χ. Γιώργος Παπαδόπουλος" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nutrition Plan Parser</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="control-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <p class="eyebrow">Internal Tool</p>
+            <h1>Nutrition Plan Parser</h1>
+            <p class="panel-copy">
+              Επικόλλησε το raw κείμενο διατροφής και δημιούργησε άμεσα ένα
+              premium preview για screenshot, PNG ή PDF.
+            </p>
           </div>
 
-          <div class="field-group">
-            <label for="goal">Goal</label>
-            <input id="goal" type="text" placeholder="π.χ. Fat Loss" />
+          <div class="form-grid">
+            <label class="field">
+              <span>Αθλητής</span>
+              <input
+                type="text"
+                id="athleteName"
+                placeholder="π.χ. Κωνσταντίνος Κανέτος"
+              />
+            </label>
+
+            <label class="field">
+              <span>Στόχος</span>
+              <input
+                type="text"
+                id="goal"
+                placeholder="π.χ. Μυϊκή Ανάπτυξη / Απόδοση"
+              />
+            </label>
+
+            <label class="field">
+              <span>Διάρκεια</span>
+              <input
+                type="text"
+                id="duration"
+                placeholder="π.χ. 15 Ημέρες"
+              />
+            </label>
           </div>
 
-          <div class="field-group">
-            <label for="duration">Duration</label>
-            <input id="duration" type="text" placeholder="π.χ. 4 Weeks" />
+          <label class="field field-textarea">
+            <span>Raw Nutrition Text</span>
+            <textarea
+              id="rawText"
+              placeholder="Κάνε επικόλληση εδώ το κείμενο από SMS / chat / notes..."
+            ></textarea>
+          </label>
+
+          <div class="button-row">
+            <button id="parseBtn" class="btn btn-primary">Parse Plan</button>
+            <button id="exampleBtn" class="btn btn-secondary">Load Example</button>
+            <button id="resetBtn" class="btn btn-ghost">Reset</button>
           </div>
-        </div>
 
-        <div class="field-group">
-          <label for="rawInput">Raw Nutrition Text</label>
-          <textarea id="rawInput" placeholder="Κάνε επικόλληση εδώ το ελληνικό raw κείμενο..."></textarea>
-        </div>
-
-        <div class="button-row">
-          <button id="parseBtn" class="btn btn-primary">Parse Plan</button>
-          <button id="resetBtn" class="btn btn-secondary" type="button">Reset</button>
-          <button id="exampleBtn" class="btn btn-ghost" type="button">Load Example</button>
-        </div>
-
-        <div class="helper-box">
-          <div class="helper-title">Supported patterns</div>
-          <p>
-            Γεύμα 1, Πρωινό, Μεσημεριανό, Βραδινό, Snack, Pre/Post Workout, Σημειώσεις, Παρατηρήσεις.
-          </p>
-        </div>
-      </div>
-    </aside>
-
-    <main class="preview-panel">
-      <div class="toolbar panel-card no-print">
-        <div>
-          <div class="eyebrow">Preview</div>
-          <h2>Live Nutrition Page</h2>
-        </div>
-        <div class="toolbar-actions">
-          <button id="printBtn" class="btn btn-secondary" type="button">Print / Save PDF</button>
-        </div>
-      </div>
-
-      <section id="previewPage" class="nutrition-page">
-        <header class="page-hero">
-          <div>
-            <div class="hero-kicker">Misailidis Hybrid Method</div>
-            <h2 id="previewAthlete">Athlete Name</h2>
-            <p id="previewSubtitle">Premium nutrition plan preview ready for screenshot and PDF export.</p>
+          <div class="button-row export-row">
+            <button id="pngBtn" class="btn btn-secondary">Download PNG</button>
+            <button id="pdfBtn" class="btn btn-secondary">Print / Save PDF</button>
+            <button id="fitBtn" class="btn btn-ghost">Auto Fit</button>
           </div>
-        </header>
 
-        <section class="info-strip">
-          <article class="info-card">
-            <span class="info-label">Athlete</span>
-            <strong id="infoAthlete">—</strong>
-          </article>
-          <article class="info-card">
-            <span class="info-label">Goal</span>
-            <strong id="infoGoal">—</strong>
-          </article>
-          <article class="info-card">
-            <span class="info-label">Duration</span>
-            <strong id="infoDuration">—</strong>
-          </article>
-        </section>
-
-        <section class="content-card">
-          <div id="mealsContainer" class="meals-grid"></div>
-
-          <section id="notesSection" class="notes-section hidden">
-            <div class="section-heading">
-              <span></span>
-              <h3>Σημειώσεις</h3>
+          <div class="debug-box" id="debugBox">
+            <div class="debug-header">
+              <h2>Parsed JSON</h2>
+              <button id="copyJsonBtn" class="btn btn-mini">Copy JSON</button>
             </div>
-            <ul id="notesList" class="notes-list"></ul>
-          </section>
-        </section>
-      </section>
-    </main>
-  </div>
+            <pre id="jsonOutput">{}</pre>
+          </div>
+        </div>
+      </aside>
 
-  <script src="app.js"></script>
-</body>
+      <main class="preview-stage">
+        <div class="paper-frame">
+          <section class="preview-paper fit-scale" id="previewPaper">
+            <header class="plan-hero">
+              <div class="hero-orb"></div>
+              <p class="hero-eyebrow">FLEXPRO ONLINE COACHING</p>
+              <h2>Διατροφικό Πλάνο Αθλητή</h2>
+              <p class="hero-copy">
+                Το παρακάτω πλάνο έχει σχεδιαστεί για να υποστηρίξει την απόδοση,
+                την αποκατάσταση και τη συνέπεια στην καθημερινότητα. Στόχος δεν
+                είναι η τελειότητα, αλλά η σωστή εφαρμογή του πλάνου με
+                σταθερότητα.
+              </p>
+            </header>
+
+            <section class="plan-body">
+              <div class="summary-cards">
+                <article class="summary-card">
+                  <span>ΑΘΛΗΤΗΣ</span>
+                  <strong id="previewAthlete">—</strong>
+                </article>
+                <article class="summary-card">
+                  <span>ΣΤΟΧΟΣ</span>
+                  <strong id="previewGoal">—</strong>
+                </article>
+                <article class="summary-card">
+                  <span>ΔΙΑΡΚΕΙΑ ΠΛΑΝΟΥ</span>
+                  <strong id="previewDuration">—</strong>
+                </article>
+              </div>
+
+              <section class="section-block">
+                <h3>Nutrition Plan</h3>
+                <p class="section-copy">
+                  Όλα τα τρόφιμα μετρώνται μαγειρεμένα. Διατήρησε σταθερή
+                  ενυδάτωση, συνέπεια στα γεύματα και επικοινώνησε για οποιαδήποτε
+                  προσαρμογή χρειαστεί.
+                </p>
+              </section>
+
+              <section id="mealsContainer" class="meals-wrapper"></section>
+
+              <section id="notesSection" class="notes-card hidden">
+                <h3>Βασικές Οδηγίες</h3>
+                <ul id="notesList"></ul>
+              </section>
+
+              <footer class="plan-footer">
+                TASOS MISAILIDIS • FLEXPRO COACHING
+              </footer>
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
 </html>
