@@ -13,11 +13,20 @@
         <div class="panel-card">
           <div class="panel-header">
             <p class="eyebrow">Internal Tool</p>
-            <h1>Nutrition Plan Parser</h1>
+            <h1>Nutrition Plan Builder</h1>
             <p class="panel-copy">
-              Επικόλλησε το raw κείμενο διατροφής και δημιούργησε άμεσα ένα
-              premium preview για screenshot, PNG ή PDF.
+              Επίλεξε parser mode ή manual mode και δημιούργησε άμεσα premium
+              nutrition plan preview για PNG ή PDF.
             </p>
+          </div>
+
+          <div class="mode-switch">
+            <button id="parserModeBtn" class="mode-btn active" type="button">
+              Parser Mode
+            </button>
+            <button id="manualModeBtn" class="mode-btn" type="button">
+              Manual Mode
+            </button>
           </div>
 
           <div class="form-grid">
@@ -49,19 +58,54 @@
             </label>
           </div>
 
-          <label class="field field-textarea">
-            <span>Raw Nutrition Text</span>
-            <textarea
-              id="rawText"
-              placeholder="Κάνε επικόλληση εδώ το κείμενο από SMS / chat / notes..."
-            ></textarea>
-          </label>
+          <section id="parserModeSection" class="mode-section">
+            <label class="field field-textarea">
+              <span>Raw Nutrition Text</span>
+              <textarea
+                id="rawText"
+                placeholder="Κάνε επικόλληση εδώ το κείμενο από SMS / chat / notes..."
+              ></textarea>
+            </label>
 
-          <div class="button-row">
-            <button id="parseBtn" class="btn btn-primary">Parse Plan</button>
-            <button id="exampleBtn" class="btn btn-secondary">Load Example</button>
-            <button id="resetBtn" class="btn btn-ghost">Reset</button>
-          </div>
+            <div class="button-row">
+              <button id="parseBtn" class="btn btn-primary">Parse Plan</button>
+              <button id="exampleBtn" class="btn btn-secondary">Load Example</button>
+              <button id="resetBtn" class="btn btn-ghost">Reset</button>
+            </div>
+          </section>
+
+          <section id="manualModeSection" class="mode-section hidden">
+            <div class="manual-builder">
+              <div class="manual-header-row">
+                <h2>Meals Builder</h2>
+                <button id="addMealBtn" type="button" class="btn btn-secondary">
+                  Add Meal
+                </button>
+              </div>
+
+              <div id="manualMealsContainer" class="manual-meals"></div>
+
+              <label class="field field-textarea">
+                <span>Σημειώσεις / Notes</span>
+                <textarea
+                  id="manualNotes"
+                  placeholder="Μία σημείωση ανά γραμμή..."
+                ></textarea>
+              </label>
+
+              <div class="button-row">
+                <button id="generateManualBtn" class="btn btn-primary" type="button">
+                  Generate Preview
+                </button>
+                <button id="loadManualExampleBtn" class="btn btn-secondary" type="button">
+                  Load Manual Example
+                </button>
+                <button id="resetManualBtn" class="btn btn-ghost" type="button">
+                  Reset Manual
+                </button>
+              </div>
+            </div>
+          </section>
 
           <div class="button-row export-row">
             <button id="pngBtn" class="btn btn-secondary">Download PNG</button>
@@ -134,6 +178,41 @@
         </div>
       </main>
     </div>
+
+    <template id="manualMealTemplate">
+      <article class="manual-meal-card">
+        <div class="manual-meal-top">
+          <h3>Meal</h3>
+          <button type="button" class="btn btn-ghost btn-remove-meal">
+            Remove
+          </button>
+        </div>
+
+        <div class="manual-meal-grid">
+          <label class="field">
+            <span>Meal Title</span>
+            <input type="text" class="manual-meal-title" placeholder="Γεύμα 1" />
+          </label>
+
+          <label class="field">
+            <span>Meal Subtitle</span>
+            <input
+              type="text"
+              class="manual-meal-subtitle"
+              placeholder="Πρωινό / Snack / Pre Workout"
+            />
+          </label>
+        </div>
+
+        <label class="field field-textarea">
+          <span>Meal Items</span>
+          <textarea
+            class="manual-meal-items"
+            placeholder="Μία γραμμή = ένα item&#10;80g βρώμη&#10;2 αυγά&#10;1 μπανάνα"
+          ></textarea>
+        </label>
+      </article>
+    </template>
 
     <script src="app.js"></script>
   </body>

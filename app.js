@@ -1,4 +1,4 @@
-const STORAGE_KEY = "nutrition_tool_state_v3";
+const STORAGE_KEY = "nutrition_tool_state_v4";
 
 const exampleText = `Γεύμα 1 – Πρωινό
 • Ασπράδια αυγών: 10 τεμάχια
@@ -45,6 +45,56 @@ const exampleText = `Γεύμα 1 – Πρωινό
 • Οι ποσότητες παραμένουν σταθερές ανεξάρτητα από την επιλογή.
 • Η συνέπεια στις βασικές οδηγίες είναι αυτή που φέρνει το αποτέλεσμα.`;
 
+const manualExample = {
+  athleteName: "Αλέξανδρος Μανιατέας",
+  goal: "Fat Loss",
+  duration: "14 Ημέρες",
+  meals: [
+    {
+      title: "Γεύμα 1",
+      subtitle: "Πρωινό",
+      items: [
+        "80 g βρώμη",
+        "2 ολόκληρα + 4 ασπράδια",
+        "15 - 20 μπλουμπερι φρέσκα"
+      ]
+    },
+    {
+      title: "Γεύμα 2",
+      subtitle: "Μεσημεριανό",
+      items: [
+        "220 g φιλέτο κοτόπουλο ή γαλοπούλα (κρέας)",
+        "300 g πατάτα βραστή ή φούρνου",
+        "Πράσινη σαλάτα",
+        "1 κ.σ. ελαιόλαδο"
+      ]
+    },
+    {
+      title: "Γεύμα 3",
+      subtitle: "Pre Workout",
+      items: [
+        "200 g άπαχο ψάρι (μπακαλιάρος, γλώσσα)",
+        "200 g πατάτα",
+        "Λαχανικά"
+      ]
+    },
+    {
+      title: "Γεύμα 4",
+      subtitle: "Βραδινό",
+      items: [
+        "200 g κοτόπουλο ή άπαχο κρέας",
+        "Μεγάλη σαλάτα λαχανικών",
+        "1 κ.σ. ελαιόλαδο"
+      ]
+    }
+  ],
+  notes: [
+    "Νερό: 3 – 4 λίτρα ημερησίως",
+    "Αλάτι: Ελεγχόμενο",
+    "Αποφυγή ζάχαρης και επεξεργασμένων τροφών"
+  ]
+};
+
 const mealLabelRegex = /^(Γεύμα\s*\d+)\s*[–—-]?\s*(.*)$/i;
 const notesRegex = /^(σημειώσεις|παρατηρήσεις|notes)\s*[:\-–—]?\s*(.*)$/i;
 const optionRegex = /^(επιλογή\s*[α-ωa-z0-9]+)\s*[:\-–—]?\s*(.*)$/i;
@@ -90,8 +140,23 @@ const elements = {
   mealsContainer: document.getElementById("mealsContainer"),
   notesSection: document.getElementById("notesSection"),
   notesList: document.getElementById("notesList"),
-  previewPaper: document.getElementById("previewPaper")
+  previewPaper: document.getElementById("previewPaper"),
+
+  parserModeBtn: document.getElementById("parserModeBtn"),
+  manualModeBtn: document.getElementById("manualModeBtn"),
+  parserModeSection: document.getElementById("parserModeSection"),
+  manualModeSection: document.getElementById("manualModeSection"),
+
+  manualMealsContainer: document.getElementById("manualMealsContainer"),
+  manualNotes: document.getElementById("manualNotes"),
+  addMealBtn: document.getElementById("addMealBtn"),
+  generateManualBtn: document.getElementById("generateManualBtn"),
+  loadManualExampleBtn: document.getElementById("loadManualExampleBtn"),
+  resetManualBtn: document.getElementById("resetManualBtn"),
+  manualMealTemplate: document.getElementById("manualMealTemplate")
 };
+
+let currentMode = "parser";
 
 function normalizeText(text) {
   return text
@@ -291,11 +356,11 @@ function renderMeals(meals) {
         </div>
         <div class="meal-col meal-foods">
           <ul class="meal-food-list">
-            <li>Δεν βρέθηκαν γεύματα ακόμη. Κάνε Parse Plan για να εμφανιστεί το πλάνο.</li>
+            <li>Δεν βρέθηκαν γεύματα ακόμη. Συμπλήρωσε στοιχεία ή κάνε parse.</li>
           </ul>
         </div>
         <div class="meal-col meal-comment">
-          <p>Η προεπισκόπηση θα ενημερωθεί μόλις γίνει ανάλυση του κειμένου.</p>
+          <p>Η προεπισκόπηση θα ενημερωθεί μόλις δημιουργηθεί το πλάνο.</p>
         </div>
       </article>
     `;
@@ -325,7 +390,7 @@ function renderMeals(meals) {
     } else {
       centerMarkup = `
         <ul class="meal-food-list">
-          ${meal.items.map((item) => `<li>${formatFoodLine(item)}</li>`).join("")}
+          ${(meal.items || []).map((item) => `<li>${formatFoodLine(item)}</li>`).join("")}
         </ul>
       `;
     }
@@ -369,15 +434,30 @@ function renderPreview(data) {
   elements.jsonOutput.textContent = JSON.stringify(data, null, 2);
 
   requestAnimationFrame(() => {
+    applySmartFit();
     autoFitPreview();
   });
-
-  setTimeout(() => {
-  applySmartFit();
-}, 50);
 }
 
-function getFormState() {
+function applySmartFit() {
+  const paper = elements.previewPaper;
+  paper.classList.remove("fit-tight", "fit-extreme");
+
+  const maxHeight = 1123;
+  const currentHeight = paper.scrollHeight;
+
+  if (currentHeight <= maxHeight) return;
+
+  paper.classList.add("fit-tight");
+
+  setTimeout(() => {
+    if (paper.scrollHeight > maxHeight) {
+      paper.classList.add("fit-extreme");
+    }
+  }, 50);
+}
+
+function getParserState() {
   return {
     athleteName: elements.athleteName.value.trim(),
     goal: elements.goal.value.trim(),
@@ -386,8 +466,58 @@ function getFormState() {
   };
 }
 
+function getManualMealsData() {
+  const cards = Array.from(
+    elements.manualMealsContainer.querySelectorAll(".manual-meal-card")
+  );
+
+  return cards
+    .map((card, index) => {
+      const title = card.querySelector(".manual-meal-title").value.trim();
+      const subtitle = card.querySelector(".manual-meal-subtitle").value.trim();
+      const itemsRaw = card.querySelector(".manual-meal-items").value.trim();
+
+      const items = itemsRaw
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      return {
+        title: title || `Γεύμα ${index + 1}`,
+        subtitle,
+        items
+      };
+    })
+    .filter((meal) => meal.title || meal.subtitle || meal.items.length);
+}
+
+function buildManualPlanObject() {
+  const notes = elements.manualNotes.value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return {
+    athleteName: elements.athleteName.value.trim(),
+    goal: elements.goal.value.trim(),
+    duration: elements.duration.value.trim(),
+    meals: getManualMealsData(),
+    notes
+  };
+}
+
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getFormState()));
+  const state = {
+    mode: currentMode,
+    athleteName: elements.athleteName.value.trim(),
+    goal: elements.goal.value.trim(),
+    duration: elements.duration.value.trim(),
+    rawText: elements.rawText.value,
+    manualNotes: elements.manualNotes.value,
+    manualMeals: getManualMealsData()
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function loadState() {
@@ -396,19 +526,77 @@ function loadState() {
 
   try {
     const data = JSON.parse(saved);
+
     elements.athleteName.value = data.athleteName || "";
     elements.goal.value = data.goal || "";
     elements.duration.value = data.duration || "";
     elements.rawText.value = data.rawText || "";
+    elements.manualNotes.value = data.manualNotes || "";
+
+    const savedMeals = Array.isArray(data.manualMeals) ? data.manualMeals : [];
+    if (savedMeals.length) {
+      elements.manualMealsContainer.innerHTML = "";
+      savedMeals.forEach((meal) => addManualMeal(meal));
+    } else {
+      addManualMeal();
+    }
+
+    setMode(data.mode === "manual" ? "manual" : "parser", false);
   } catch (error) {
     console.error("Failed to load saved state", error);
+    addManualMeal();
   }
 }
 
+function setMode(mode, shouldSave = true) {
+  currentMode = mode;
+
+  const isParser = mode === "parser";
+
+  elements.parserModeBtn.classList.toggle("active", isParser);
+  elements.manualModeBtn.classList.toggle("active", !isParser);
+  elements.parserModeSection.classList.toggle("hidden", !isParser);
+  elements.manualModeSection.classList.toggle("hidden", isParser);
+
+  if (shouldSave) saveState();
+}
+
 function runParse() {
-  const state = getFormState();
+  const state = getParserState();
   const parsed = parseNutritionText(state.rawText, state);
   renderPreview(parsed);
+  saveState();
+}
+
+function generateManualPreview() {
+  const plan = buildManualPlanObject();
+  renderPreview(plan);
+  saveState();
+}
+
+function resetParser() {
+  elements.rawText.value = "";
+  renderPreview({
+    athleteName: elements.athleteName.value.trim(),
+    goal: elements.goal.value.trim(),
+    duration: elements.duration.value.trim(),
+    meals: [],
+    notes: []
+  });
+  saveState();
+}
+
+function resetManual() {
+  elements.manualMealsContainer.innerHTML = "";
+  addManualMeal();
+  elements.manualNotes.value = "";
+  renderPreview({
+    athleteName: elements.athleteName.value.trim(),
+    goal: elements.goal.value.trim(),
+    duration: elements.duration.value.trim(),
+    meals: [],
+    notes: []
+  });
   saveState();
 }
 
@@ -417,7 +605,11 @@ function resetAll() {
   elements.goal.value = "";
   elements.duration.value = "";
   elements.rawText.value = "";
+  elements.manualNotes.value = "";
+  elements.manualMealsContainer.innerHTML = "";
+  addManualMeal();
   localStorage.removeItem(STORAGE_KEY);
+
   renderPreview({
     athleteName: "",
     goal: "",
@@ -432,7 +624,54 @@ function loadExample() {
   elements.goal.value = "Μυϊκή Ανάπτυξη / Απόδοση";
   elements.duration.value = "15 Ημέρες";
   elements.rawText.value = exampleText;
+  setMode("parser");
   runParse();
+}
+
+function loadManualExample() {
+  elements.athleteName.value = manualExample.athleteName;
+  elements.goal.value = manualExample.goal;
+  elements.duration.value = manualExample.duration;
+  elements.manualNotes.value = manualExample.notes.join("\n");
+
+  elements.manualMealsContainer.innerHTML = "";
+  manualExample.meals.forEach((meal) => addManualMeal(meal));
+
+  setMode("manual");
+  generateManualPreview();
+}
+
+function addManualMeal(meal = {}) {
+  const fragment = elements.manualMealTemplate.content.cloneNode(true);
+  const card = fragment.querySelector(".manual-meal-card");
+
+  const titleInput = card.querySelector(".manual-meal-title");
+  const subtitleInput = card.querySelector(".manual-meal-subtitle");
+  const itemsTextarea = card.querySelector(".manual-meal-items");
+  const removeBtn = card.querySelector(".btn-remove-meal");
+
+  titleInput.value = meal.title || "";
+  subtitleInput.value = meal.subtitle || "";
+  itemsTextarea.value = Array.isArray(meal.items) ? meal.items.join("\n") : "";
+
+  removeBtn.addEventListener("click", () => {
+    const cards = elements.manualMealsContainer.querySelectorAll(".manual-meal-card");
+    if (cards.length <= 1) {
+      titleInput.value = "";
+      subtitleInput.value = "";
+      itemsTextarea.value = "";
+    } else {
+      card.remove();
+    }
+    saveState();
+  });
+
+  [titleInput, subtitleInput, itemsTextarea].forEach((input) => {
+    input.addEventListener("input", saveState);
+  });
+
+  elements.manualMealsContainer.appendChild(card);
+  saveState();
 }
 
 function autoFitPreview() {
@@ -457,6 +696,8 @@ function autoFitPreview() {
 }
 
 async function downloadPNG() {
+  applySmartFit();
+
   const originalPaper = elements.previewPaper;
   const safeName =
     (elements.athleteName.value || "nutrition-plan")
@@ -492,15 +733,17 @@ async function downloadPNG() {
 
   const exportHeight = Math.ceil(clone.scrollHeight);
 
-  applySmartFit();
-
   const canvas = await html2canvas(clone, {
     backgroundColor: "#ffffff",
     scale: 2.5,
     useCORS: true,
+    logging: false,
     width: 794,
-    windowWidth: 1400, // 🔥 force desktop layout
+    height: exportHeight,
+    windowWidth: 1400,
     windowHeight: exportHeight,
+    scrollX: 0,
+    scrollY: 0
   });
 
   document.body.removeChild(exportWrapper);
@@ -512,6 +755,7 @@ async function downloadPNG() {
 }
 
 function printPDF() {
+  applySmartFit();
   const paper = elements.previewPaper;
   const previousTransform = paper.style.transform;
   paper.style.transform = "none";
@@ -522,11 +766,20 @@ function printPDF() {
   }, 400);
 }
 
+elements.parserModeBtn.addEventListener("click", () => setMode("parser"));
+elements.manualModeBtn.addEventListener("click", () => setMode("manual"));
+
 elements.parseBtn.addEventListener("click", runParse);
 elements.exampleBtn.addEventListener("click", loadExample);
-elements.resetBtn.addEventListener("click", resetAll);
-elements.pdfBtn.addEventListener("click", printPDF);
+elements.resetBtn.addEventListener("click", resetParser);
+
+elements.addMealBtn.addEventListener("click", () => addManualMeal());
+elements.generateManualBtn.addEventListener("click", generateManualPreview);
+elements.loadManualExampleBtn.addEventListener("click", loadManualExample);
+elements.resetManualBtn.addEventListener("click", resetManual);
+
 elements.pngBtn.addEventListener("click", downloadPNG);
+elements.pdfBtn.addEventListener("click", printPDF);
 elements.fitBtn.addEventListener("click", autoFitPreview);
 
 elements.copyJsonBtn.addEventListener("click", async () => {
@@ -541,7 +794,13 @@ elements.copyJsonBtn.addEventListener("click", async () => {
   }
 });
 
-[elements.athleteName, elements.goal, elements.duration, elements.rawText].forEach((el) => {
+[
+  elements.athleteName,
+  elements.goal,
+  elements.duration,
+  elements.rawText,
+  elements.manualNotes
+].forEach((el) => {
   el.addEventListener("input", saveState);
 });
 
@@ -549,40 +808,14 @@ window.addEventListener("resize", autoFitPreview);
 
 loadState();
 
-if (elements.rawText.value.trim()) {
-  runParse();
-} else {
-  renderPreview({
-    athleteName: "",
-    goal: "",
-    duration: "",
-    meals: [],
-    notes: []
-  });
+if (!elements.manualMealsContainer.children.length) {
+  addManualMeal();
 }
 
-function applySmartFit() {
-  const paper = elements.previewPaper;
-
-  // reset first
-  paper.classList.remove("fit-tight", "fit-extreme");
-
-  const maxHeight = 1123; // A4 height px
-  const currentHeight = paper.scrollHeight;
-
-  // if already fits → do nothing
-  if (currentHeight <= maxHeight) return;
-
-  // apply first compression
-  paper.classList.add("fit-tight");
-
-  // re-check
-  setTimeout(() => {
-    const newHeight = paper.scrollHeight;
-
-    if (newHeight > maxHeight) {
-      // apply extreme mode
-      paper.classList.add("fit-extreme");
-    }
-  }, 50);
-}
+renderPreview({
+  athleteName: elements.athleteName.value.trim(),
+  goal: elements.goal.value.trim(),
+  duration: elements.duration.value.trim(),
+  meals: [],
+  notes: []
+});
