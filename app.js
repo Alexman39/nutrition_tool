@@ -1,326 +1,155 @@
-const STORAGE_KEY = "nutrition_tool_state_v4";
+const form = document.getElementById("planForm");
+const athleteNameInput = document.getElementById("athleteName");
+const goalInput = document.getElementById("goal");
+const planTypeInput = document.getElementById("planType");
+const rawTextInput = document.getElementById("rawText");
+const downloadBtn = document.getElementById("downloadBtn");
+const resetBtn = document.getElementById("resetBtn");
+const previewMount = document.getElementById("previewMount");
+const exportMount = document.getElementById("exportMount");
+const debugOutput = document.getElementById("debugOutput");
 
-const exampleText = `Γεύμα 1 – Πρωινό
-• Ασπράδια αυγών: 10 τεμάχια
-• Κρόκος αυγού: 1 τεμάχιο
-• Βρώμη: 80γρ
-• Μπλούμπερι φρέσκα: 15 τεμάχια
-• Μήλο: 1 τεμάχιο
+const DEFAULT_FORM = {
+  athleteName: "Γιώργος Βενέτος",
+  goal: "Σωματική Βελτίωση / Απόδοση",
+  planType: "Nutrition Plan",
+  rawText: `ΓΕΥΜΑ 1 (ΠΡΩΙΝΟ)
+• Ασπράδια αυγών: 8
+• 1 ολόκληρο αυγό
+• Γλυκοπατάτα: 150g
+• Λαχανικά
 
-Γεύμα 2 – Σνακ
-Επιλογή Α
-• Στήθος κοτόπουλο 180γρ
-• Ρύζι 200γρ
-• Αγγούρι μικρό 1 τεμάχιο
+ΓΕΥΜΑ 2
+• Στήθος κοτόπουλο: 180g
+• Καστανό ρύζι: 120g (μαγειρεμένο)
+• Σαλάτα
+• Ελαιόλαδο: 10g
 
-Επιλογή Β
-• Ρόφημα πρωτεΐνης 2 scoops
-• Μπανάνα 1 τεμάχιο
+ΓΕΥΜΑ 3 (PRE WORKOUT)
+• Γαλοπούλα φιλέτο: 160g
+• Γλυκοπατάτα: 200g
+• Λαχανικά
 
-Γεύμα 3 – Μεσημεριανό
-• Γλυκοπατάτα ή πατάτα: 250γρ
-• Στήθος κοτόπουλο: 180γρ
-• Σαλάτα: Λίγη
+POST WORKOUT
+• 1 scoop πρωτεΐνη whey
+• (προαιρετικά) 1 μικρό φρούτο
 
-Γεύμα 4 – Σνακ
-Επιλογή Α
-• Ρύζι 200γρ
-• Ασπράδια αυγών 6 τεμάχια
+ΓΕΥΜΑ 4
+• Ψάρι: 200g
+• Καστανό ρύζι: 100g (μαγειρεμένο)
+• Σαλάτα
 
-Επιλογή Β
-• Ρόφημα πρωτεΐνης 2 scoops
-• Ρυζογκοφρέτα + Φυστικοβούτυρο 2 τεμάχια
-• Μπανάνα ή Μήλο 1 τεμάχιο
+ΓΕΥΜΑ 5 (ΒΡΑΔΙΝΟ)
+• Μοσχάρι άπαχο: 150g
+• Σαλάτα
+• Ελαιόλαδο: 10g
 
-Γεύμα 5 – Βραδινό
-• Γλυκοπατάτα: 180γρ
-• Πηγή πρωτεΐνης Α: Κοτόπουλο 160γρ
-• Πηγή πρωτεΐνης Β: Ψάρι 200γρ
-• Πηγή πρωτεΐνης Γ: Μοσχάρι 200γρ
-• Σαλάτα: Λίγη
+ΓΕΥΜΑ 6 (ΠΡΟ ΥΠΝΟΥ)
+• Ασπράδια αυγών: 6
+• ή
+• Γιαούρτι 2%: εναλλακτική επιλογή
+• Σημείωση: Μπορεί να χρησιμοποιηθεί και πλήρες κατσικίσιο γιαούρτι στο βραδινό, όπου επιλέγεται.
 
-Σημειώσεις
-• Όλα τα τρόφιμα ζυγίζονται μετά το μαγείρεμα.
-• Στόχος ενυδάτωσης: 2–3 μπουκάλια νερό ημερησίως.
-• Οι ποσότητες παραμένουν σταθερές ανεξάρτητα από την επιλογή.
-• Η συνέπεια στις βασικές οδηγίες είναι αυτή που φέρνει το αποτέλεσμα.`;
-
-const manualExample = {
-  athleteName: "Αλέξανδρος Μανιατέας",
-  goal: "Fat Loss",
-  duration: "14 Ημέρες",
-  meals: [
-    {
-      title: "Γεύμα 1",
-      subtitle: "Πρωινό",
-      items: [
-        "80 g βρώμη",
-        "2 ολόκληρα + 4 ασπράδια",
-        "15 - 20 μπλουμπερι φρέσκα"
-      ]
-    },
-    {
-      title: "Γεύμα 2",
-      subtitle: "Μεσημεριανό",
-      items: [
-        "220 g φιλέτο κοτόπουλο ή γαλοπούλα (κρέας)",
-        "300 g πατάτα βραστή ή φούρνου",
-        "Πράσινη σαλάτα",
-        "1 κ.σ. ελαιόλαδο"
-      ]
-    },
-    {
-      title: "Γεύμα 3",
-      subtitle: "Pre Workout",
-      items: [
-        "200 g άπαχο ψάρι (μπακαλιάρος, γλώσσα)",
-        "200 g πατάτα",
-        "Λαχανικά"
-      ]
-    },
-    {
-      title: "Γεύμα 4",
-      subtitle: "Βραδινό",
-      items: [
-        "200 g κοτόπουλο ή άπαχο κρέας",
-        "Μεγάλη σαλάτα λαχανικών",
-        "1 κ.σ. ελαιόλαδο"
-      ]
-    }
-  ],
-  notes: [
-    "Νερό: 3 – 4 λίτρα ημερησίως",
-    "Αλάτι: Ελεγχόμενο",
-    "Αποφυγή ζάχαρης και επεξεργασμένων τροφών"
-  ]
+ΟΔΗΓΙΕΣ
+✔ Νερό: 3-4 λίτρα ημερησίως
+✔ Υδατάνθρακες γύρω από την προπόνηση
+✔ 1 cheat meal / εβδομάδα
+✔ Στις off μέρες μειώνουμε υδατάνθρακες`
 };
 
-const mealLabelRegex = /^(Γεύμα\s*\d+)\s*[–—-]?\s*(.*)$/i;
-const notesRegex = /^(σημειώσεις|παρατηρήσεις|notes)\s*[:\-–—]?\s*(.*)$/i;
-const optionRegex = /^(επιλογή\s*[α-ωa-z0-9]+)\s*[:\-–—]?\s*(.*)$/i;
+const SECTION_SPLIT_RE =
+  /(ΓΕΥΜΑ\s*\d+(?:\s*[-–—:]?\s*|\s*\([^)]+\)\s*|\s+)?(?:\([^)]+\))?|POST\s*WORKOUT|PRE\s*WORKOUT|ΠΡΩΙΝΟ|ΜΕΣΗΜΕΡΙΑΝΟ|ΒΡΑΔΙΝΟ|ΣΝΑΚ|SNACK)\b/gi;
 
-const standaloneMealTitles = [
-  "πρωινό",
-  "μεσημεριανό",
-  "βραδινό",
-  "σνακ",
-  "snack",
-  "pre workout",
-  "post workout",
-  "cheat meal",
-  "δεκατιανό",
-  "απογευματινό"
-];
+const NOTES_RE = /\b(ΣΗΜΕΙΩΣΕΙΣ|ΟΔΗΓΙΕΣ|ΠΑΡΑΤΗΡΗΣΕΙΣ|NOTES?)\b/i;
 
-const mealComments = [
-  "Ποιοτική έναρξη της ημέρας με έμφαση στην ενέργεια και τη σωστή κάλυψη πρωτεΐνης.",
-  "Ενδιάμεσο γεύμα για υποστήριξη της ημερήσιας πρόσληψης και διατήρηση ενέργειας.",
-  "Κύριο γεύμα αποκατάστασης και απόδοσης με έλεγχο ποιότητας και κορεσμού.",
-  "Ευέλικτο σνακ για να διατηρείται η πρόσληψη θερμίδων και η εφαρμογή του πλάνου.",
-  "Βραδινό γεύμα με έμφαση στην αποκατάσταση, στον κορεσμό και στη σταθερότητα του πλάνου.",
-  "Υποστηρικτικό γεύμα με πρακτική εφαρμογή στην καθημερινότητα."
-];
-
-const elements = {
-  athleteName: document.getElementById("athleteName"),
-  goal: document.getElementById("goal"),
-  duration: document.getElementById("duration"),
-  rawText: document.getElementById("rawText"),
-  parseBtn: document.getElementById("parseBtn"),
-  exampleBtn: document.getElementById("exampleBtn"),
-  resetBtn: document.getElementById("resetBtn"),
-  pdfBtn: document.getElementById("pdfBtn"),
-  pngBtn: document.getElementById("pngBtn"),
-  fitBtn: document.getElementById("fitBtn"),
-  copyJsonBtn: document.getElementById("copyJsonBtn"),
-  jsonOutput: document.getElementById("jsonOutput"),
-  previewAthlete: document.getElementById("previewAthlete"),
-  previewGoal: document.getElementById("previewGoal"),
-  previewDuration: document.getElementById("previewDuration"),
-  mealsContainer: document.getElementById("mealsContainer"),
-  notesSection: document.getElementById("notesSection"),
-  notesList: document.getElementById("notesList"),
-  previewPaper: document.getElementById("previewPaper"),
-
-  parserModeBtn: document.getElementById("parserModeBtn"),
-  manualModeBtn: document.getElementById("manualModeBtn"),
-  parserModeSection: document.getElementById("parserModeSection"),
-  manualModeSection: document.getElementById("manualModeSection"),
-
-  manualMealsContainer: document.getElementById("manualMealsContainer"),
-  manualNotes: document.getElementById("manualNotes"),
-  addMealBtn: document.getElementById("addMealBtn"),
-  generateManualBtn: document.getElementById("generateManualBtn"),
-  loadManualExampleBtn: document.getElementById("loadManualExampleBtn"),
-  resetManualBtn: document.getElementById("resetManualBtn"),
-  manualMealTemplate: document.getElementById("manualMealTemplate")
-};
-
-let currentMode = "parser";
-
-function normalizeText(text) {
-  return text
+function normalizeText(raw) {
+  return raw
+    .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .replace(/[•●▪◦]/g, "\n• ")
-    .replace(/\t/g, " ")
-    .replace(/[ ]{2,}/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/\s*([–—-])\s*/g, " $1 ")
-    .trim();
-}
-
-function splitInlineMeals(text) {
-  return text
-    .replace(/(Γεύμα\s*\d+\s*[–—-]?\s*[^\n•]*)/gi, "\n$1\n")
-    .replace(
-      /(?<!Γεύμα\s*\d+\s*[–—-]?\s*)\b(Πρωινό|Μεσημεριανό|Βραδινό|Σνακ|Snack|Pre Workout|Post Workout|Cheat Meal|Δεκατιανό|Απογευματινό)\b/gi,
-      "\n$1\n"
-    )
-    .replace(/(Σημειώσεις|Παρατηρήσεις|Notes)\s*([•\-\n])/gi, "\n$1\n")
+    .replace(/[✔✅✓]/g, "\n✔ ")
+    .replace(/\u2028|\u2029/g, "\n")
+    .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-}
-
-function preprocessText(raw) {
-  const normalized = normalizeText(raw);
-  return splitInlineMeals(normalized);
 }
 
 function cleanLine(line) {
   return line
-    .replace(/^[•\-–—]+\s*/, "")
+    .replace(/^[•\-–—\*]+\s*/g, "")
+    .replace(/^[✔✅✓]+\s*/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function isStandaloneMealTitle(line) {
-  const lower = line.toLowerCase().trim();
-  return standaloneMealTitles.includes(lower);
-}
+function extractNotes(text) {
+  const match = NOTES_RE.exec(text);
+  if (!match) return { bodyWithoutNotes: text, notes: [] };
 
-function parseNutritionText(rawText, meta = {}) {
-  const preprocessed = preprocessText(rawText);
-  const lines = preprocessed
-    .split("\n")
-    .map((line) => cleanLine(line))
+  const idx = match.index;
+  const notesBlock = text.slice(idx);
+  const bodyWithoutNotes = text.slice(0, idx).trim();
+
+  const notesLabelRemoved = notesBlock.replace(NOTES_RE, "").trim();
+  const notes = notesLabelRemoved
+    .split(/\n+/)
+    .flatMap((line) => {
+      const cleaned = cleanLine(line);
+      return cleaned ? [cleaned] : [];
+    })
     .filter(Boolean);
 
-  const result = {
-    athleteName: meta.athleteName || "",
-    goal: meta.goal || "",
-    duration: meta.duration || "",
-    meals: [],
-    notes: []
-  };
-
-  let currentMeal = null;
-  let currentOption = null;
-  let inNotes = false;
-
-  function pushMeal(title, subtitle = "") {
-    const meal = {
-      title: title || `Γεύμα ${result.meals.length + 1}`,
-      subtitle,
-      items: [],
-      options: []
-    };
-    result.meals.push(meal);
-    currentMeal = meal;
-    currentOption = null;
-    inNotes = false;
-  }
-
-  function pushOption(label) {
-    if (!currentMeal) {
-      pushMeal(`Γεύμα ${result.meals.length + 1}`, "");
-    }
-    const option = {
-      label,
-      items: []
-    };
-    currentMeal.options.push(option);
-    currentOption = option;
-  }
-
-  for (const line of lines) {
-    const mealMatch = line.match(mealLabelRegex);
-    const notesMatch = line.match(notesRegex);
-    const optionMatch = line.match(optionRegex);
-
-    if (notesMatch) {
-      inNotes = true;
-      currentMeal = null;
-      currentOption = null;
-      const trailing = cleanLine(notesMatch[2] || "");
-      if (trailing) result.notes.push(trailing);
-      continue;
-    }
-
-    if (mealMatch) {
-      const mealBase = cleanLine(mealMatch[1] || "");
-      const subtitle = cleanLine(mealMatch[2] || "");
-      pushMeal(mealBase, subtitle);
-      continue;
-    }
-
-    if (isStandaloneMealTitle(line)) {
-      const titleLabel = `Γεύμα ${result.meals.length + 1}`;
-      pushMeal(titleLabel, line);
-      continue;
-    }
-
-    if (optionMatch && currentMeal && !inNotes) {
-      pushOption(cleanLine(optionMatch[1]));
-      const trailing = cleanLine(optionMatch[2] || "");
-      if (trailing) currentOption.items.push(trailing);
-      continue;
-    }
-
-    if (inNotes) {
-      result.notes.push(line);
-      continue;
-    }
-
-    if (!currentMeal) {
-      const titleLabel = `Γεύμα ${result.meals.length + 1}`;
-      pushMeal(titleLabel, "");
-    }
-
-    if (currentOption) {
-      currentOption.items.push(line);
-    } else {
-      currentMeal.items.push(line);
-    }
-  }
-
-  result.meals = result.meals.filter(
-    (meal) => meal.items.length || meal.options.length || meal.subtitle
-  );
-
-  result.notes = result.notes.filter(Boolean);
-
-  return result;
+  return { bodyWithoutNotes, notes };
 }
 
-function formatFoodLine(text) {
-  const colonIndex = text.indexOf(":");
-  if (colonIndex > 0) {
-    const left = text.slice(0, colonIndex).trim();
-    const right = text.slice(colonIndex + 1).trim();
-    return `<strong>${escapeHtml(left)}:</strong> ${escapeHtml(right)}`;
+function normalizeTitle(title) {
+  return title
+    .replace(/\s+/g, " ")
+    .replace(/^\s+|\s+$/g, "")
+    .replace(/\(([^)]+)\)/g, (_, inner) => ` ${inner}`)
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function parseMealSection(section) {
+  const lines = section.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  if (!lines.length) return null;
+
+  const title = normalizeTitle(lines[0]);
+  const items = lines
+    .slice(1)
+    .map(cleanLine)
+    .filter(Boolean);
+
+  return { title, items };
+}
+
+function splitMeals(text) {
+  const matches = [...text.matchAll(SECTION_SPLIT_RE)];
+  if (!matches.length) return [];
+
+  const sections = [];
+  for (let i = 0; i < matches.length; i += 1) {
+    const start = matches[i].index;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    sections.push(text.slice(start, end).trim());
   }
 
-  const amountPattern =
-    /^((?:\d+[.,]?\d*\s*(?:g|γρ|γραμ|gr|kg|ml|τεμάχια|τεμάχιο|scoops?|κ\.σ\.|κουταλιές?)\b))/i;
-  const amountMatch = text.match(amountPattern);
+  return sections.map(parseMealSection).filter(Boolean);
+}
 
-  if (amountMatch) {
-    return `<strong>${escapeHtml(amountMatch[1])}</strong> ${escapeHtml(
-      text.replace(amountMatch[1], "").trim()
-    )}`;
-  }
+function parsePlan(rawText, meta = {}) {
+  const normalized = normalizeText(rawText);
+  const { bodyWithoutNotes, notes } = extractNotes(normalized);
+  const meals = splitMeals(bodyWithoutNotes);
 
-  return escapeHtml(text);
+  return {
+    athleteName: meta.athleteName?.trim() || "Όνομα Αθλητή",
+    goal: meta.goal?.trim() || "Σωματική Βελτίωση / Απόδοση",
+    planType: meta.planType?.trim() || "Nutrition Plan",
+    meals,
+    notes
+  };
 }
 
 function escapeHtml(str) {
@@ -329,493 +158,230 @@ function escapeHtml(str) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll("'", "&#39;");
 }
 
-function getMealTitle(meal, index) {
-  return meal.title || `Γεύμα ${index + 1}`;
-}
+function formatMealTitle(title) {
+  const parts = title.split(/\s{2,}| - | – | — /).filter(Boolean);
 
-function getMealSubtitle(meal) {
-  return meal.subtitle || "";
-}
-
-function getMealComment(index) {
-  return mealComments[index] || mealComments[mealComments.length - 1];
-}
-
-function renderMeals(meals) {
-  elements.mealsContainer.innerHTML = "";
-
-  if (!meals.length) {
-    elements.mealsContainer.innerHTML = `
-      <article class="meal-row">
-        <div class="meal-col meal-col-title">
-          <h4 class="meal-title">Γεύμα 1</h4>
-          <p class="meal-subtitle">—</p>
-        </div>
-        <div class="meal-col meal-foods">
-          <ul class="meal-food-list">
-            <li>Δεν βρέθηκαν γεύματα ακόμη. Συμπλήρωσε στοιχεία ή κάνε parse.</li>
-          </ul>
-        </div>
-        <div class="meal-col meal-comment">
-          <p>Η προεπισκόπηση θα ενημερωθεί μόλις δημιουργηθεί το πλάνο.</p>
-        </div>
-      </article>
-    `;
-    return;
+  if (parts.length > 1) {
+    return `${escapeHtml(parts[0])}<br>${escapeHtml(parts.slice(1).join(" "))}`;
   }
 
-  meals.forEach((meal, index) => {
-    const title = getMealTitle(meal, index);
-    const subtitle = getMealSubtitle(meal);
-    const comment = getMealComment(index);
+  const tokens = title.split(" ");
+  if (tokens.length >= 3 && /^ΓΕΥΜΑ$/i.test(tokens[0])) {
+    return `${escapeHtml(tokens.slice(0, 2).join(" "))}<br>${escapeHtml(tokens.slice(2).join(" "))}`;
+  }
 
-    let centerMarkup = "";
+  return escapeHtml(title);
+}
 
-    if (meal.options && meal.options.length) {
-      centerMarkup = meal.options
+function renderMealItems(items) {
+  return items
+    .map((item) => {
+      const colonIndex = item.indexOf(":");
+      if (colonIndex > -1) {
+        const label = item.slice(0, colonIndex + 1);
+        const value = item.slice(colonIndex + 1).trim();
+        return `<strong>${escapeHtml(label)}</strong> ${escapeHtml(value)}<br>`;
+      }
+      return `<strong>${escapeHtml(item)}</strong><br>`;
+    })
+    .join("");
+}
+
+function generateMealGoal(title, index) {
+  const t = title.toUpperCase();
+
+  if (t.includes("PRE WORKOUT")) {
+    return "Προπονητικό γεύμα με έμφαση στην ενέργεια και την υποστήριξη της απόδοσης πριν την άσκηση.";
+  }
+  if (t.includes("POST WORKOUT")) {
+    return "Άμεση υποστήριξη αποκατάστασης μετά την προπόνηση με γρήγορη και πρακτική επιλογή.";
+  }
+  if (t.includes("ΠΡΩΙΝ")) {
+    return "Πρωινό γεύμα με έμφαση στην ποιότητα, τον κορεσμό και τη σταθερή έναρξη της ημέρας.";
+  }
+  if (t.includes("ΒΡΑΔΙΝ")) {
+    return "Βραδινό γεύμα με έμφαση στον κορεσμό, την αποκατάσταση και τη σταθερότητα του πλάνου.";
+  }
+  if (t.includes("ΠΡΟ ΥΠΝΟΥ")) {
+    return "Τελικό γεύμα ημέρας με στόχο τη σταθερή πρωτεϊνική κάλυψη πριν τον ύπνο.";
+  }
+  if (index === 1) {
+    return "Κύριο γεύμα υποστήριξης για ενέργεια, αποκατάσταση και διατήρηση σταθερής απόδοσης.";
+  }
+  return "Ισορροπημένο γεύμα για συνέχιση της ημερήσιας πρόσληψης με έμφαση στην ποιότητα.";
+}
+
+function buildExportMarkup(plan) {
+  const mealsMarkup = plan.meals.length
+    ? plan.meals
         .map(
-          (option) => `
-            <div class="option-block">
-              <p class="option-title">${escapeHtml(option.label)}:</p>
-              <ul class="option-list">
-                ${option.items.map((item) => `<li>${formatFoodLine(item)}</li>`).join("")}
-              </ul>
+          (meal, index) => `
+            <div class="meal-card">
+              <div class="meal-name">${formatMealTitle(meal.title)}</div>
+              <div class="meal-details">
+                ${renderMealItems(meal.items)}
+              </div>
+              <div class="meal-goal">
+                ${escapeHtml(generateMealGoal(meal.title, index))}
+              </div>
             </div>
           `
         )
-        .join("");
-    } else {
-      centerMarkup = `
-        <ul class="meal-food-list">
-          ${(meal.items || []).map((item) => `<li>${formatFoodLine(item)}</li>`).join("")}
-        </ul>
-      `;
-    }
+        .join("")
+    : `<div class="empty-state">No meals detected yet.</div>`;
 
-    const mealMarkup = `
-      <article class="meal-row">
-        <div class="meal-col meal-col-title">
-          <h4 class="meal-title">${escapeHtml(title)}</h4>
-          <p class="meal-subtitle">${escapeHtml(subtitle || " ")}</p>
-        </div>
-        <div class="meal-col meal-foods">
-          ${centerMarkup}
-        </div>
-        <div class="meal-col meal-comment">
-          <p>${escapeHtml(comment)}</p>
-        </div>
-      </article>
-    `;
+  const notesMarkup = plan.notes.length
+    ? `
+      <div class="notes">
+        <h3>Οδηγίες</h3>
+        <p>${plan.notes.map((n) => `✔ ${escapeHtml(n)}`).join("<br>")}</p>
+      </div>
+    `
+    : "";
 
-    elements.mealsContainer.insertAdjacentHTML("beforeend", mealMarkup);
-  });
+  return `
+    <div class="export-page">
+      <div class="page">
+        <section class="hero">
+          <div class="brand">FlexPro Online Coaching</div>
+          <h1>Διατροφικό Πλάνο</h1>
+          <p>
+            Το παρακάτω πλάνο έχει σχεδιαστεί για να υποστηρίξει την απόδοση,
+            την αποκατάσταση και τη συνέπεια στην καθημερινότητα. Στόχος είναι
+            η σωστή εφαρμογή του πλάνου με σταθερότητα και πειθαρχία.
+          </p>
+        </section>
+
+        <section class="content-card">
+          <div class="top-row">
+            <div class="mini-card">
+              <div class="mini-label">Αθλητής</div>
+              <div class="mini-value">${escapeHtml(plan.athleteName)}</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-label">Στόχος</div>
+              <div class="mini-value">${escapeHtml(plan.goal)}</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-label">Τύπος Πλάνου</div>
+              <div class="mini-value">${escapeHtml(plan.planType)}</div>
+            </div>
+          </div>
+
+          <h2 class="section-title">Nutrition Plan</h2>
+          <p class="section-subtitle">
+            Όλα τα τρόφιμα μετρώνται σύμφωνα με τις αναγραφόμενες ποσότητες. Διατήρησε
+            συνέπεια στα γεύματα και έλεγχο στις καθημερινές επιλογές.
+          </p>
+
+          <div class="meal-grid">
+            ${mealsMarkup}
+          </div>
+
+          ${notesMarkup}
+
+          <div class="quote-box">
+            Δεν χτίζουμε μόνο σώματα. Χτίζουμε ανθρώπους.
+          </div>
+
+          <div class="footer-line">TASOS MISAILIDIS • FLEXPRO COACHING</div>
+        </section>
+      </div>
+    </div>
+  `;
 }
 
-function renderNotes(notes) {
-  if (!notes.length) {
-    elements.notesSection.classList.add("hidden");
-    elements.notesList.innerHTML = "";
-    return;
-  }
-
-  elements.notesSection.classList.remove("hidden");
-  elements.notesList.innerHTML = notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("");
+function renderPreview(plan) {
+  const markup = buildExportMarkup(plan);
+  previewMount.innerHTML = markup;
+  exportMount.innerHTML = markup;
+  debugOutput.textContent = JSON.stringify(plan, null, 2);
+  requestAnimationFrame(scalePreviewScene);
 }
 
-function renderPreview(data) {
-  elements.previewAthlete.textContent = data.athleteName || "—";
-  elements.previewGoal.textContent = data.goal || "—";
-  elements.previewDuration.textContent = data.duration || "—";
-  renderMeals(data.meals || []);
-  renderNotes(data.notes || []);
-  elements.jsonOutput.textContent = JSON.stringify(data, null, 2);
+function scalePreviewScene() {
+  const node = previewMount.querySelector(".export-page");
+  const wrap = document.querySelector(".preview-scale-wrap");
+  if (!node || !wrap) return;
 
-  requestAnimationFrame(() => {
-    applySmartFit();
-    autoFitPreview();
-  });
+  node.style.transform = "scale(1)";
+  node.style.marginBottom = "0px";
+
+  const availableWidth = wrap.clientWidth;
+  const naturalWidth = node.offsetWidth;
+  const scale = Math.min(1, availableWidth / naturalWidth);
+
+  node.style.transformOrigin = "top left";
+  node.style.transform = `scale(${scale})`;
+  node.style.marginBottom = `${(1 - scale) * node.offsetHeight * -1}px`;
 }
 
-function applySmartFit() {
-  const paper = elements.previewPaper;
-  paper.classList.remove("fit-tight", "fit-extreme");
+async function downloadPng() {
+  const exportNode = exportMount.querySelector(".export-page");
+  if (!exportNode) return;
 
-  const maxHeight = 1123;
-  const currentHeight = paper.scrollHeight;
-
-  if (currentHeight <= maxHeight) return;
-
-  paper.classList.add("fit-tight");
-
-  setTimeout(() => {
-    if (paper.scrollHeight > maxHeight) {
-      paper.classList.add("fit-extreme");
-    }
-  }, 50);
-}
-
-function getParserState() {
-  return {
-    athleteName: elements.athleteName.value.trim(),
-    goal: elements.goal.value.trim(),
-    duration: elements.duration.value.trim(),
-    rawText: elements.rawText.value
-  };
-}
-
-function getManualMealsData() {
-  const cards = Array.from(
-    elements.manualMealsContainer.querySelectorAll(".manual-meal-card")
-  );
-
-  return cards
-    .map((card, index) => {
-      const title = card.querySelector(".manual-meal-title").value.trim();
-      const subtitle = card.querySelector(".manual-meal-subtitle").value.trim();
-      const itemsRaw = card.querySelector(".manual-meal-items").value.trim();
-
-      const items = itemsRaw
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean);
-
-      return {
-        title: title || `Γεύμα ${index + 1}`,
-        subtitle,
-        items
-      };
-    })
-    .filter((meal) => meal.title || meal.subtitle || meal.items.length);
-}
-
-function buildManualPlanObject() {
-  const notes = elements.manualNotes.value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return {
-    athleteName: elements.athleteName.value.trim(),
-    goal: elements.goal.value.trim(),
-    duration: elements.duration.value.trim(),
-    meals: getManualMealsData(),
-    notes
-  };
-}
-
-function saveState() {
-  const state = {
-    mode: currentMode,
-    athleteName: elements.athleteName.value.trim(),
-    goal: elements.goal.value.trim(),
-    duration: elements.duration.value.trim(),
-    rawText: elements.rawText.value,
-    manualNotes: elements.manualNotes.value,
-    manualMeals: getManualMealsData()
-  };
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return;
+  const buttons = document.querySelectorAll(".btn");
+  buttons.forEach((btn) => (btn.disabled = true));
+  downloadBtn.textContent = "Preparing...";
 
   try {
-    const data = JSON.parse(saved);
+    const dataUrl = await htmlToImage.toPng(exportNode, {
+      pixelRatio: 3,
+      cacheBust: true,
+      backgroundColor: "#0b0f14",
+      skipAutoScale: true
+    });
 
-    elements.athleteName.value = data.athleteName || "";
-    elements.goal.value = data.goal || "";
-    elements.duration.value = data.duration || "";
-    elements.rawText.value = data.rawText || "";
-    elements.manualNotes.value = data.manualNotes || "";
+    const link = document.createElement("a");
+    const safeName = (athleteNameInput.value.trim() || "nutrition-plan")
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "-")
+      .replace(/^-+|-+$/g, "");
 
-    const savedMeals = Array.isArray(data.manualMeals) ? data.manualMeals : [];
-    if (savedMeals.length) {
-      elements.manualMealsContainer.innerHTML = "";
-      savedMeals.forEach((meal) => addManualMeal(meal));
-    } else {
-      addManualMeal();
-    }
-
-    setMode(data.mode === "manual" ? "manual" : "parser", false);
+    link.download = `${safeName || "nutrition-plan"}.png`;
+    link.href = dataUrl;
+    link.click();
   } catch (error) {
-    console.error("Failed to load saved state", error);
-    addManualMeal();
+    console.error(error);
+    alert("PNG export failed. Check console for details.");
+  } finally {
+    buttons.forEach((btn) => (btn.disabled = false));
+    downloadBtn.textContent = "Download PNG";
   }
 }
 
-function setMode(mode, shouldSave = true) {
-  currentMode = mode;
+function resetForm() {
+  athleteNameInput.value = DEFAULT_FORM.athleteName;
+  goalInput.value = DEFAULT_FORM.goal;
+  planTypeInput.value = DEFAULT_FORM.planType;
+  rawTextInput.value = DEFAULT_FORM.rawText;
 
-  const isParser = mode === "parser";
+  const plan = parsePlan(DEFAULT_FORM.rawText, {
+    athleteName: DEFAULT_FORM.athleteName,
+    goal: DEFAULT_FORM.goal,
+    planType: DEFAULT_FORM.planType
+  });
 
-  elements.parserModeBtn.classList.toggle("active", isParser);
-  elements.manualModeBtn.classList.toggle("active", !isParser);
-  elements.parserModeSection.classList.toggle("hidden", !isParser);
-  elements.manualModeSection.classList.toggle("hidden", isParser);
-
-  if (shouldSave) saveState();
-}
-
-function runParse() {
-  const state = getParserState();
-  const parsed = parseNutritionText(state.rawText, state);
-  renderPreview(parsed);
-  saveState();
-}
-
-function generateManualPreview() {
-  const plan = buildManualPlanObject();
   renderPreview(plan);
-  saveState();
 }
 
-function resetParser() {
-  elements.rawText.value = "";
-  renderPreview({
-    athleteName: elements.athleteName.value.trim(),
-    goal: elements.goal.value.trim(),
-    duration: elements.duration.value.trim(),
-    meals: [],
-    notes: []
-  });
-  saveState();
-}
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-function resetManual() {
-  elements.manualMealsContainer.innerHTML = "";
-  addManualMeal();
-  elements.manualNotes.value = "";
-  renderPreview({
-    athleteName: elements.athleteName.value.trim(),
-    goal: elements.goal.value.trim(),
-    duration: elements.duration.value.trim(),
-    meals: [],
-    notes: []
-  });
-  saveState();
-}
-
-function resetAll() {
-  elements.athleteName.value = "";
-  elements.goal.value = "";
-  elements.duration.value = "";
-  elements.rawText.value = "";
-  elements.manualNotes.value = "";
-  elements.manualMealsContainer.innerHTML = "";
-  addManualMeal();
-  localStorage.removeItem(STORAGE_KEY);
-
-  renderPreview({
-    athleteName: "",
-    goal: "",
-    duration: "",
-    meals: [],
-    notes: []
-  });
-}
-
-function loadExample() {
-  elements.athleteName.value = "Κωνσταντίνος Κανέτος";
-  elements.goal.value = "Μυϊκή Ανάπτυξη / Απόδοση";
-  elements.duration.value = "15 Ημέρες";
-  elements.rawText.value = exampleText;
-  setMode("parser");
-  runParse();
-}
-
-function loadManualExample() {
-  elements.athleteName.value = manualExample.athleteName;
-  elements.goal.value = manualExample.goal;
-  elements.duration.value = manualExample.duration;
-  elements.manualNotes.value = manualExample.notes.join("\n");
-
-  elements.manualMealsContainer.innerHTML = "";
-  manualExample.meals.forEach((meal) => addManualMeal(meal));
-
-  setMode("manual");
-  generateManualPreview();
-}
-
-function addManualMeal(meal = {}) {
-  const fragment = elements.manualMealTemplate.content.cloneNode(true);
-  const card = fragment.querySelector(".manual-meal-card");
-
-  const titleInput = card.querySelector(".manual-meal-title");
-  const subtitleInput = card.querySelector(".manual-meal-subtitle");
-  const itemsTextarea = card.querySelector(".manual-meal-items");
-  const removeBtn = card.querySelector(".btn-remove-meal");
-
-  titleInput.value = meal.title || "";
-  subtitleInput.value = meal.subtitle || "";
-  itemsTextarea.value = Array.isArray(meal.items) ? meal.items.join("\n") : "";
-
-  removeBtn.addEventListener("click", () => {
-    const cards = elements.manualMealsContainer.querySelectorAll(".manual-meal-card");
-    if (cards.length <= 1) {
-      titleInput.value = "";
-      subtitleInput.value = "";
-      itemsTextarea.value = "";
-    } else {
-      card.remove();
-    }
-    saveState();
+  const plan = parsePlan(rawTextInput.value, {
+    athleteName: athleteNameInput.value,
+    goal: goalInput.value,
+    planType: planTypeInput.value
   });
 
-  [titleInput, subtitleInput, itemsTextarea].forEach((input) => {
-    input.addEventListener("input", saveState);
-  });
-
-  elements.manualMealsContainer.appendChild(card);
-  saveState();
-}
-
-function autoFitPreview() {
-  const paper = elements.previewPaper;
-  const frame = paper.parentElement;
-  if (!paper || !frame) return;
-
-  const isSmallScreen = window.innerWidth <= 992;
-
-  if (isSmallScreen) {
-    paper.style.transform = "none";
-    frame.style.height = "auto";
-    return;
-  }
-
-  const availableWidth = frame.clientWidth - 12;
-  const baseWidth = 794;
-  const scale = Math.min(1, availableWidth / baseWidth);
-
-  paper.style.transform = `scale(${scale})`;
-  frame.style.height = `${paper.offsetHeight * scale}px`;
-}
-
-async function downloadPNG() {
-  applySmartFit();
-
-  const originalPaper = elements.previewPaper;
-  const safeName =
-    (elements.athleteName.value || "nutrition-plan")
-      .trim()
-      .replace(/[^\p{L}\p{N}\-_ ]/gu, "")
-      .replace(/\s+/g, "-") || "nutrition-plan";
-
-  const exportWrapper = document.createElement("div");
-  exportWrapper.style.position = "fixed";
-  exportWrapper.style.left = "-99999px";
-  exportWrapper.style.top = "0";
-  exportWrapper.style.width = "794px";
-  exportWrapper.style.padding = "0";
-  exportWrapper.style.margin = "0";
-  exportWrapper.style.background = "#ffffff";
-  exportWrapper.style.zIndex = "-1";
-  exportWrapper.style.overflow = "visible";
-
-  const clone = originalPaper.cloneNode(true);
-  clone.style.transform = "none";
-  clone.style.width = "794px";
-  clone.style.maxWidth = "794px";
-  clone.style.minHeight = "auto";
-  clone.style.height = "auto";
-  clone.style.margin = "0";
-  clone.style.overflow = "visible";
-
-  exportWrapper.appendChild(clone);
-  document.body.appendChild(exportWrapper);
-
-  await new Promise((resolve) => requestAnimationFrame(resolve));
-  await new Promise((resolve) => setTimeout(resolve, 120));
-
-  const exportHeight = Math.ceil(clone.scrollHeight);
-
-  const canvas = await html2canvas(clone, {
-    backgroundColor: "#ffffff",
-    scale: 2.5,
-    useCORS: true,
-    logging: false,
-    width: 794,
-    height: exportHeight,
-    windowWidth: 1400,
-    windowHeight: exportHeight,
-    scrollX: 0,
-    scrollY: 0
-  });
-
-  document.body.removeChild(exportWrapper);
-
-  const link = document.createElement("a");
-  link.download = `${safeName}.png`;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-}
-
-function printPDF() {
-  applySmartFit();
-  const paper = elements.previewPaper;
-  const previousTransform = paper.style.transform;
-  paper.style.transform = "none";
-  window.print();
-  setTimeout(() => {
-    paper.style.transform = previousTransform;
-    autoFitPreview();
-  }, 400);
-}
-
-elements.parserModeBtn.addEventListener("click", () => setMode("parser"));
-elements.manualModeBtn.addEventListener("click", () => setMode("manual"));
-
-elements.parseBtn.addEventListener("click", runParse);
-elements.exampleBtn.addEventListener("click", loadExample);
-elements.resetBtn.addEventListener("click", resetParser);
-
-elements.addMealBtn.addEventListener("click", () => addManualMeal());
-elements.generateManualBtn.addEventListener("click", generateManualPreview);
-elements.loadManualExampleBtn.addEventListener("click", loadManualExample);
-elements.resetManualBtn.addEventListener("click", resetManual);
-
-elements.pngBtn.addEventListener("click", downloadPNG);
-elements.pdfBtn.addEventListener("click", printPDF);
-elements.fitBtn.addEventListener("click", autoFitPreview);
-
-elements.copyJsonBtn.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(elements.jsonOutput.textContent);
-    elements.copyJsonBtn.textContent = "Copied";
-    setTimeout(() => {
-      elements.copyJsonBtn.textContent = "Copy JSON";
-    }, 1200);
-  } catch (error) {
-    console.error("Clipboard failed", error);
-  }
+  renderPreview(plan);
 });
 
-[
-  elements.athleteName,
-  elements.goal,
-  elements.duration,
-  elements.rawText,
-  elements.manualNotes
-].forEach((el) => {
-  el.addEventListener("input", saveState);
-});
+downloadBtn.addEventListener("click", downloadPng);
+resetBtn.addEventListener("click", resetForm);
+window.addEventListener("resize", scalePreviewScene);
 
-window.addEventListener("resize", autoFitPreview);
-
-loadState();
-
-if (!elements.manualMealsContainer.children.length) {
-  addManualMeal();
-}
-
-renderPreview({
-  athleteName: elements.athleteName.value.trim(),
-  goal: elements.goal.value.trim(),
-  duration: elements.duration.value.trim(),
-  meals: [],
-  notes: []
-});
+resetForm();
