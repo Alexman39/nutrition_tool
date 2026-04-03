@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlexPro Nutrition Plan</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #0b0f14 0%, #161c24 100%);
+      color: #111827;
+      padding: 28px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #111827 0%, #1f2937 55%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: 24px;
+      padding: 34px 36px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      top: -90px;
+      right: -70px;
+    }
+
+    .brand {
+      font-size: 12px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 700px;
+      color: #d1d5db;
+      line-height: 1.6;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .content-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .mini-card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
+
+    .mini-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .mini-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .section-subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .meal-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .meal-card {
+      display: grid;
+      grid-template-columns: 220px 1fr 220px;
+      gap: 0;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .meal-name {
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+      padding: 18px;
+      font-weight: 700;
+      color: #111827;
+      border-right: 1px solid #e5e7eb;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .meal-details {
+      padding: 18px 20px;
+      line-height: 1.65;
+      font-size: 14px;
+      color: #111827;
+    }
+
+    .meal-details strong {
+      font-weight: 700;
+    }
+
+    .meal-goal {
+      padding: 18px;
+      background: #fcfcfd;
+      border-left: 1px solid #e5e7eb;
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.6;
+      display: flex;
+      align-items: center;
+    }
+
+    .notes {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e5e7eb;
+    }
+
+    .notes h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #111827;
+    }
+
+    .notes p {
+      margin: 0;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.7;
+    }
+
+    .quote-box {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #111827;
+      color: #f9fafb;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.6;
+      letter-spacing: 0.2px;
+    }
+
+    .footer-line {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 11px;
+      color: #9ca3af;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      .top-row {
+        grid-template-columns: 1fr;
+      }
+
+      .meal-card {
+        grid-template-columns: 1fr;
+      }
+
+      .meal-name,
+      .meal-goal {
+        border: none;
+      }
+
+      .meal-name {
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .meal-goal {
+        border-top: 1px solid #e5e7eb;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="brand">FlexPro Online Coaching</div>
+      <h1>Διατροφικό Πλάνο</h1>
+      <p>
+        Το παρακάτω πλάνο έχει σχεδιαστεί για να υποστηρίξει την απόδοση,
+        την αποκατάσταση και τη συνέπεια στην καθημερινότητα. Στόχος είναι
+        η σωστή εφαρμογή του πλάνου με σταθερότητα και πειθαρχία.
+      </p>
+    </section>
+
+    <section class="content-card">
+      <div class="top-row">
+        <div class="mini-card">
+          <div class="mini-label">Αθλητής</div>
+          <div class="mini-value">Γιώργος Βενέτος</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Στόχος</div>
+          <div class="mini-value">Σωματική Βελτίωση / Απόδοση</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Τύπος Πλάνου</div>
+          <div class="mini-value">Nutrition Plan</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Nutrition Plan</h2>
+      <p class="section-subtitle">
+        Όλα τα τρόφιμα μετρώνται σύμφωνα με τις αναγραφόμενες ποσότητες. Διατήρησε
+        συνέπεια στα γεύματα και έλεγχο στις καθημερινές επιλογές.
+      </p>
+
+      <div class="meal-grid">
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 1<br>ΠΡΩΙΝΟ</div>
+          <div class="meal-details">
+            <strong>Ασπράδια αυγών:</strong> 8<br>
+            <strong>Ολόκληρο αυγό:</strong> 1<br>
+            <strong>Γλυκοπατάτα:</strong> 150g<br>
+            <strong>Λαχανικά</strong>
+          </div>
+          <div class="meal-goal">
+            Πρωινό γεύμα με έμφαση στην ποιότητα, τον κορεσμό και τη σταθερή έναρξη της ημέρας.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 2</div>
+          <div class="meal-details">
+            <strong>Στήθος κοτόπουλο:</strong> 180g<br>
+            <strong>Καστανό ρύζι:</strong> 120g (μαγειρεμένο)<br>
+            <strong>Σαλάτα</strong><br>
+            <strong>Ελαιόλαδο:</strong> 10g
+          </div>
+          <div class="meal-goal">
+            Κύριο γεύμα υποστήριξης για ενέργεια, αποκατάσταση και διατήρηση σταθερής απόδοσης.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 3<br>PRE WORKOUT</div>
+          <div class="meal-details">
+            <strong>Γαλοπούλα φιλέτο:</strong> 160g<br>
+            <strong>Γλυκοπατάτα:</strong> 200g<br>
+            <strong>Λαχανικά</strong>
+          </div>
+          <div class="meal-goal">
+            Προπονητικό γεύμα με έμφαση στην ενέργεια και την υποστήριξη της απόδοσης πριν την άσκηση.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">POST WORKOUT</div>
+          <div class="meal-details">
+            <strong>Πρωτεΐνη whey:</strong> 1 scoop<br>
+            <strong>Προαιρετικά:</strong> 1 μικρό φρούτο
+          </div>
+          <div class="meal-goal">
+            Άμεση υποστήριξη αποκατάστασης μετά την προπόνηση με γρήγορη και πρακτική επιλογή.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 4</div>
+          <div class="meal-details">
+            <strong>Ψάρι:</strong> 200g<br>
+            <strong>Καστανό ρύζι:</strong> 100g (μαγειρεμένο)<br>
+            <strong>Σαλάτα</strong>
+          </div>
+          <div class="meal-goal">
+            Ισορροπημένο γεύμα για συνέχιση της ημερήσιας πρόσληψης με έμφαση στην ποιότητα.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 5<br>ΒΡΑΔΙΝΟ</div>
+          <div class="meal-details">
+            <strong>Μοσχάρι άπαχο:</strong> 150g<br>
+            <strong>Σαλάτα</strong><br>
+            <strong>Ελαιόλαδο:</strong> 10g
+          </div>
+          <div class="meal-goal">
+            Βραδινό γεύμα με έμφαση στον κορεσμό, την αποκατάσταση και τη σταθερότητα του πλάνου.
+          </div>
+        </div>
+
+        <div class="meal-card">
+          <div class="meal-name">ΓΕΥΜΑ 6<br>ΠΡΟ ΥΠΝΟΥ</div>
+          <div class="meal-details">
+            <strong>Ασπράδια αυγών:</strong> 6<br>
+            <strong>ή</strong><br>
+            <strong>Γιαούρτι 2%:</strong> εναλλακτική επιλογή<br>
+            <strong>Σημείωση:</strong> Μπορεί να χρησιμοποιηθεί και πλήρες κατσικίσιο γιαούρτι στο βραδινό, όπου επιλέγεται.
+          </div>
+          <div class="meal-goal">
+            Τελικό γεύμα ημέρας με στόχο τη σταθερή πρωτεϊνική κάλυψη πριν τον ύπνο.
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <h3>Οδηγίες</h3>
+        <p>
+          ✔ Νερό: 3-4 λίτρα ημερησίως<br>
+          ✔ Υδατάνθρακες γύρω από την προπόνηση<br>
+          ✔ 1 cheat meal / εβδομάδα<br>
+          ✔ Στις off μέρες μειώνουμε υδατάνθρακες
+        </p>
+      </div>
+
+      <div class="quote-box">
+        Δεν χτίζουμε μόνο σώματα. Χτίζουμε ανθρώπους.
+      </div>
+
+      <div class="footer-line">TASOS MISAILIDIS • FLEXPRO COACHING</div>
+    </section>
+  </div>
+</body>
+</html>

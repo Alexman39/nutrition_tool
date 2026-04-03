@@ -440,14 +440,18 @@ function autoFitPreview() {
   const frame = paper.parentElement;
   if (!paper || !frame) return;
 
-  if (window.innerWidth <= 860) {
+  const isSmallScreen = window.innerWidth <= 992;
+
+  if (isSmallScreen) {
     paper.style.transform = "none";
+    frame.style.height = "auto";
     return;
   }
 
-  const availableWidth = frame.clientWidth - 20;
+  const availableWidth = frame.clientWidth - 12;
   const baseWidth = 794;
   const scale = Math.min(1, availableWidth / baseWidth);
+
   paper.style.transform = `scale(${scale})`;
   frame.style.height = `${paper.offsetHeight * scale}px`;
 }
