@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nutrition Plan Generator</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -11,20 +12,29 @@
     rel="stylesheet"
   />
 
-  <!-- Favicons (favicon/) -->
   <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="favicon/android-chrome-192x192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="favicon/android-chrome-512x512.png" />
   <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png" />
   <link rel="icon" href="favicon.ico" />
-  
-  <!-- Styling -->
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="control-panel">
+      <div class="panel-head">
+        <div class="eyebrow">Internal Tool</div>
+        <h1>Nutrition Plan Generator</h1>
+        <p>
+          Paste raw Greek nutrition text, generate a premium preview, and export
+          it as PNG. This version uses your current parser/export flow.
+        </p>
+      </div>
+
+      <form id="planForm" class="form-stack">
+        <div class="field">
           <label for="athleteName">Athlete Name</label>
           <input id="athleteName" type="text" placeholder="e.g. Γιώργος Βενέτος" />
         </div>
@@ -43,7 +53,11 @@
 
         <div class="field">
           <label for="rawText">Raw Nutrition Text</label>
-          <textarea id="rawText" rows="18" placeholder="Paste the raw nutrition text here..."></textarea>
+          <textarea
+            id="rawText"
+            rows="18"
+            placeholder="Paste the raw nutrition text here..."
+          ></textarea>
         </div>
 
         <div class="button-row">
@@ -65,7 +79,9 @@
           <div class="eyebrow">Live Preview</div>
           <h2>Export Scene</h2>
         </div>
-        <div class="preview-note">PNG download uses this exact layout and styling.</div>
+        <div class="preview-note">
+          PNG download uses this exact layout and styling.
+        </div>
       </div>
 
       <div class="preview-stage-shell">
@@ -76,7 +92,6 @@
     </main>
   </div>
 
-  <!-- hidden full-resolution export scene -->
   <div class="export-hidden-area" aria-hidden="true">
     <div id="exportMount"></div>
   </div>
